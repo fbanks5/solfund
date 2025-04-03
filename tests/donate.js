@@ -11,9 +11,10 @@ describe("Donate to Campaign", () => {
     const campaignKeypair = anchor.web3.Keypair.generate();
 
     it("Creates a new campaign to donate to", async () => {
+        const deadline = new anchor.BN(Math.floor(Date.now() / 1000) + 60); // 60 seconds from now
         await program.methods
             // Create a new campaign
-            .createCampaign("Fundraiser", "Help fund our open-source app", new anchor.BN(500000000)) // 0.5 SOL in lamports
+            .createCampaign("Fundraiser", "Help fund our open-source app", new anchor.BN(500000000), deadline) // 0.5 SOL in lamports
             .accounts({
                 campaign: campaignKeypair.publicKey, // The public key of the campaign account
                 authority: provider.wallet.publicKey, // The public key of the authority (the wallet)

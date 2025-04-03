@@ -12,6 +12,7 @@ pub mod solana_kickstarter { // Main program module
         name: String,                 // Campaign name
         description: String,          // Campaign description
         goal_amount: u64,             // Goal amount for the campaign
+        deadline: i64,                 // Unix timestamp for the campaign deadline
     ) -> Result<()> {
         let campaign = &mut ctx.accounts.campaign; // Initialize the campaign account
 
@@ -56,7 +57,7 @@ pub mod solana_kickstarter { // Main program module
         require!(campaign.amount_donated >= campaign.goal_amount, CustomError::GoalNotMet);
 
         // Check if the campaign has reached its deadline
-        **ctx.accounts.campaign.to_account_info().try_borrow_mut_lamports()? -= campaign.amount_donated;
+        **campaign.to_account_info().try_borrow_mut_lamports()? -= campaign.amount_donated;
         // Transfer the funds to the authority
         **ctx.accounts.authority.to_account_info().try_borrow_mut_lamports()? += campaign.amount_donated;
 
@@ -75,7 +76,7 @@ pub mod solana_kickstarter { // Main program module
         require!(campaign.amount_donated < campaign.goal_amount, CustomError::GoalWasMet);
 
         // Check if the refund amount is less than or equal to the amount donated
-        **ctx.accounts.campaign.to_account_info().try_borrow_mut_lamports()? -= amount;
+        **campaign.to_account_info().try_borrow_mut_lamports()? -= amount;
         // Transfer the funds to the donor
         **ctx.accounts.donor.to_account_info().try_borrow_mut_lamports()? += amount;
 

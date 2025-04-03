@@ -11,9 +11,10 @@ describe("solana_kickstarter", () => {  // The test case name
     it("Creates a new campaign!", async () => { // Arrange
         // Add your test here.
         const campaignKeypair = anchor.web3.Keypair.generate();
+        const deadline = new anchor.BN(Math.floor(Date.now() / 1000) + 60); // 60 seconds from now
 
         await program.methods
-            .createCampaign("My Campaign", "Help me build cool stuff", new anchor.BN(1000000000)) // 1 SOL in lamports
+            .createCampaign("My Campaign", "Help me build cool stuff", new anchor.BN(1000000000), deadline) // 1 SOL in lamports
             .accounts({
                 campaign: campaignKeypair.publicKey, // The public key of the campaign account
                 authority: provider.wallet.publicKey, // The public key of the authority (the wallet)
