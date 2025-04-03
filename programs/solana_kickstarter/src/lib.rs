@@ -23,6 +23,29 @@ pub mod solana_kickstarter { // Main program module
 
         Ok(())
     }
+
+    /// Function to donate to a campaign
+    pub fn donate(ctx: Context<Donate>, amount: u64) -> Result<()> {
+        // Check if the amount is greater than zero
+        let ix = anchor_lang::solana_program::system_instruction::transfer(
+            &ctx.accounts.donor.key(), // Donor's public key
+            &ctx.accounts.campaign.key(), // Campaign's public key
+            amount, // Amount to donate
+        );
+        // Invoke the system program to transfer the funds
+        anchor_lang::solana_program::program::invoke(
+            &ix,
+            &[
+                ctx.accounts.donor.to_account_info(),
+                ctx.accounts.campaign.to_account_info(),
+            ],
+        )?;
+        // Update the amount donated in the campaign account
+        let campaign = &mut ctx.accounts.campaign;
+        campaign.amount_donated += amount; // Increment the amount donated
+
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
@@ -35,6 +58,17 @@ pub struct CreateCampaign<'info> {
     pub authority: Signer<'info>,           // Authority who creates the campaign
 
     pub system_program: Program<'info, System>,     // System program to handle account creation
+}
+#[derive(Accounts)]
+/// Context for donating to a campaign
+pub struct Donate<'info> {
+    #[account(mut)]
+    pub campaign: Account<'info, Campaign>, // Campaign account to store campaign data
+
+    #[account(mut)]
+    pub donor: Signer<'info>,           // Donor who is donating to the campaign
+
+    pub system_program: Program<'info, System>, // System program to handle account creation
 }
 
 #[account]
